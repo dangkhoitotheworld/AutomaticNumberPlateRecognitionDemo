@@ -143,16 +143,6 @@ Thư viện và mô hình bên thứ ba:
 - [SORT](https://github.com/abewley/sort) – Simple Online and Realtime Tracking
 - [RapidOCR](https://github.com/RapidAI/RapidOCR)
 
-## 📈 Kết quả
-
-*(Bổ sung số liệu thật của nhóm vào bảng dưới)*
-
-| Mô hình | mAP@0.5 | Precision | Recall | Số ảnh train / val |
-| --- | --- | --- | --- | --- |
-| `plate.pt` | … | … | … | … |
-| `char.pt` | … | … | … | … |
-
-Ảnh và video đầu ra nằm trong thư mục [`ket_qua/`](ket_qua/).
 
 ## ⚠️ Hạn chế và hướng phát triển
 
