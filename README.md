@@ -117,10 +117,10 @@ Hai mô hình được **fine-tune (huấn luyện tiếp) từ mô hình YOLOv8
 3. Chạy các ô lệnh để huấn luyện mô hình phát hiện biển số và mô hình nhận diện ký tự.
 4. Tải hai file trọng số `plate.pt` và `char.pt` về, đặt cùng thư mục với `bien_so_yolo.py`.
 
-| Mô hình | Nhiệm vụ | Khởi tạo từ | Số epoch | Kích thước ảnh |
-|---------|----------|-------------|----------|----------------|
-| `plate.pt` | Phát hiện biển số | YOLOv8 pre-trained | `[điền]` | `[điền]` |
-| `char.pt`  | Nhận diện ký tự   | YOLOv8 pre-trained | `[điền]` | `[điền]` |
+| Mô hình | Nhiệm vụ | Khởi tạo từ |
+|---------|----------|-------------|
+| `plate.pt` | Phát hiện biển số | YOLOv8 pre-trained |
+| `char.pt`  | Nhận diện ký tự   | YOLOv8 pre-trained |
 
 ## 📊 Dữ liệu và giấy phép
 
