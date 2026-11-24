@@ -1,47 +1,46 @@
-# 🚗 Automatic Number Plate Recognition Demo (YOLOv8 + OpenCV + SORT)
+# 🚗 Automatic Number Plate Recognition Demo
 
-Ứng dụng demo **nhận diện biển số xe** từ ảnh và video, được thực hiện trong khuôn khổ tiểu luận nhóm môn *Chuyên đề Hệ thống giao thông thông minh* (đề tài 20: *Xây dựng ứng dụng nhận diện biển số xe*).
+> Nhận diện biển số xe từ **ảnh** và **video** bằng YOLOv8, OpenCV, SORT và RapidOCR.
 
-Hệ thống gồm hai mô hình YOLOv8 được **fine-tune** từ mô hình pre-trained: một mô hình **phát hiện biển số** (`plate.pt`) và một mô hình **nhận diện ký tự** (`char.pt`). Khi mô hình ký tự không đọc được, chương trình có thể dùng **RapidOCR** (pre-trained) làm phương án dự phòng.
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![YOLOv8](https://img.shields.io/badge/YOLOv8-Ultralytics-orange)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+Đây là ứng dụng demo thuộc tiểu luận nhóm môn **Chuyên đề Hệ thống giao thông thông minh** (*Xây dựng ứng dụng nhận diện biển số xe*).
+
+Hệ thống dùng hai mô hình YOLOv8 được **fine-tune** từ trọng số pre-trained:
+
+| Mô hình | Nhiệm vụ |
+| --- | --- |
+| `plate.pt` | Phát hiện vị trí biển số trong ảnh/khung hình |
+| `char.pt` | Nhận diện từng ký tự trên biển số |
+
+Khi `char.pt` không đọc được, chương trình có thể chuyển sang **RapidOCR** (pre-trained) làm phương án dự phòng.
 
 ---
 
 ## 📑 Mục lục
 
 1. [Tính năng](#-tính-năng)
-2. [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
-3. [Quy trình xử lý](#-quy-trình-xử-lý)
-4. [Cài đặt](#-cài-đặt)
-5. [Cách sử dụng](#-cách-sử-dụng)
+2. [Quy trình xử lý](#-quy-trình-xử-lý)
+3. [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
+4. [Cài đặt](#️-cài-đặt)
+5. [Cách sử dụng](#️-cách-sử-dụng)
 6. [Huấn luyện mô hình](#-huấn-luyện-mô-hình)
-7. [Dữ liệu và giấy phép](#-dữ-liệu-và-giấy-phép)
+7. [Dữ liệu](#-dữ-liệu)
 8. [Kết quả](#-kết-quả)
-9. [Hạn chế và hướng phát triển](#-hạn-chế-và-hướng-phát-triển)
-10. [Nhóm thực hiện](#-nhóm-thực-hiện)
+9. [Hạn chế và hướng phát triển](#️-hạn-chế-và-hướng-phát-triển)
 
 ---
 
 ## ✨ Tính năng
 
-- Phát hiện vị trí biển số xe trong **ảnh** và **video**.
-- Đọc ký tự trên biển số bằng mô hình YOLOv8 tự fine-tune (`char.pt`).
-- Theo dõi (tracking) biển số qua các khung hình bằng thuật toán **SORT**, giúp hạn chế đọc lặp lại cùng một xe.
-- Dự phòng bằng **RapidOCR** (pre-trained) khi cần.
+- Phát hiện biển số trong **ảnh** và **video**.
+- Đọc ký tự bằng mô hình YOLOv8 tự fine-tune (`char.pt`).
+- Theo dõi biển số qua các khung hình bằng **SORT**, tránh đọc lặp lại cùng một xe.
+- Dự phòng bằng **RapidOCR** khi mô hình ký tự không đọc được.
 - Ba chế độ chạy: `yolo`, `ocr`, `auto`.
-- Có sẵn notebook Google Colab để huấn luyện lại mô hình.
-
-## 📁 Cấu trúc thư mục
-
-```
-AutomaticNumberPlateRecognitionDemo/
-├── bien_so_yolo.py                 # Chương trình chính: phát hiện + đọc biển số
-├── plate.pt                        # Mô hình YOLOv8 phát hiện biển số
-├── char.pt                         # Mô hình YOLOv8 nhận diện ký tự
-├── huan_luyen_yolov8_colab.ipynb   # Notebook huấn luyện (Google Colab)
-├── anh_thu_nhieu_bien.png          # Ảnh thử nghiệm (5 biển số, có biển bị xoay)
-├── ket_qua/                        # Ảnh/video kết quả đầu ra
-└── README.md
-```
+- Có sẵn notebook Google Colab để huấn luyện lại.
 
 ## 🔄 Quy trình xử lý
 
@@ -49,31 +48,46 @@ AutomaticNumberPlateRecognitionDemo/
 Ảnh / Video
     │
     ▼
-[1] Phát hiện biển số  (YOLOv8 – plate.pt)
+[1] Phát hiện biển số           (YOLOv8 – plate.pt)
     │
     ▼
-[2] Theo dõi biển số qua các khung hình  (SORT)
+[2] Theo dõi qua các khung hình (SORT)
     │
     ▼
-[3] Cắt vùng biển số  (OpenCV)
+[3] Cắt vùng biển số            (OpenCV)
     │
     ▼
-[4] Nhận diện ký tự  (YOLOv8 – char.pt)   ──(không đọc được)──▶  RapidOCR (dự phòng)
+[4] Nhận diện ký tự             (YOLOv8 – char.pt) ──(thất bại)──▶ RapidOCR
     │
     ▼
 [5] Ghép ký tự theo vị trí → chuỗi biển số → vẽ kết quả lên ảnh/video
 ```
 
+## 📁 Cấu trúc thư mục
+
+```
+AutomaticNumberPlateRecognitionDemo/
+├── bien_so_yolo.py                 # Chương trình chính
+├── plate.pt                        # Trọng số phát hiện biển số
+├── char.pt                         # Trọng số nhận diện ký tự
+├── huan_luyen_yolov8_colab.ipynb   # Notebook huấn luyện (Colab)
+├── anh_thu_nhieu_bien.png          # Ảnh thử nghiệm (5 biển, có biển bị xoay)
+├── ket_qua/                        # Ảnh/video kết quả đầu ra
+├── requirements.txt                # Thư viện cần cài
+├── LICENSE
+└── README.md
+```
+
 ## ⚙️ Cài đặt
 
-**Yêu cầu:** Python 3.9 trở lên (khuyến nghị 3.10+).
+**Yêu cầu:** Python 3.9 trở lên (khuyến nghị 3.10+). Có GPU NVIDIA sẽ chạy video nhanh hơn nhưng không bắt buộc.
 
 ```bash
 # 1. Tải mã nguồn
-git clone https://github.com/phamdangkhoi170706-blip/AutomaticNumberPlateRecognitionDemo.git
+git clone https://github.com/dangkhoitotheworld/AutomaticNumberPlateRecognitionDemo.git
 cd AutomaticNumberPlateRecognitionDemo
 
-# 2. (Tuỳ chọn) Tạo môi trường ảo
+# 2. (Khuyến nghị) Tạo môi trường ảo
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 
@@ -81,73 +95,76 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-> Nếu chưa có `requirements.txt`, tham khảo mục thư viện chính: `ultralytics`, `opencv-python`, `numpy`, `rapidocr-onnxruntime`, cùng các thư viện mà bản cài đặt SORT yêu cầu (thường là `filterpy`, `scipy`).
+Thư viện sử dụng: `ultralytics`, `opencv-python`, `numpy`, `rapidocr-onnxruntime`, `filterpy`, `scipy`.
 
 ## ▶️ Cách sử dụng
 
-Chương trình chính là `bien_so_yolo.py`, hỗ trợ ba chế độ qua tham số `--mode`:
+Chương trình chính là `bien_so_yolo.py`, chọn chế độ qua tham số `--mode`:
 
 | Chế độ | Mô tả |
-|--------|-------|
-| `yolo` | Chỉ dùng hai mô hình tự fine-tune (`plate.pt` + `char.pt`). Dùng khi muốn đánh giá riêng chất lượng mô hình của nhóm. |
-| `ocr`  | Phát hiện biển số bằng YOLO, đọc ký tự bằng RapidOCR (pre-trained). |
-| `auto` | Ưu tiên mô hình YOLO ký tự; nếu không đọc được thì chuyển sang RapidOCR. |
-
-Ví dụ (kiểm tra lại tên tham số bằng `python bien_so_yolo.py --help`):
+| --- | --- |
+| `yolo` | Chỉ dùng hai mô hình tự fine-tune (`plate.pt` + `char.pt`). Phù hợp để đánh giá riêng chất lượng mô hình của nhóm. |
+| `ocr` | Phát hiện biển bằng YOLO, đọc ký tự bằng RapidOCR. |
+| `auto` | Ưu tiên `char.pt`; nếu không đọc được thì chuyển sang RapidOCR. |
 
 ```bash
-# Chạy thử với ảnh mẫu
+# Ảnh mẫu, chế độ auto
 python bien_so_yolo.py --mode auto --source anh_thu_nhieu_bien.png
 
 # Chỉ dùng mô hình tự fine-tune
 python bien_so_yolo.py --mode yolo --source anh_thu_nhieu_bien.png
 
-# Chạy trên video
+# Video
 python bien_so_yolo.py --mode auto --source duong_dan/video.mp4
 ```
 
-Kết quả được lưu trong thư mục `ket_qua/`.
+Xem toàn bộ tham số: `python bien_so_yolo.py --help`. Kết quả được lưu trong thư mục `ket_qua/`.
 
 ## 🧠 Huấn luyện mô hình
 
-Hai mô hình được **fine-tune (huấn luyện tiếp) từ mô hình YOLOv8 pre-trained**, không huấn luyện từ đầu. Toàn bộ quá trình nằm trong notebook `huan_luyen_yolov8_colab.ipynb`:
+Hai mô hình được **fine-tune từ YOLOv8 pre-trained**, không huấn luyện từ đầu. Toàn bộ quy trình nằm trong `huan_luyen_yolov8_colab.ipynb`:
 
 1. Mở notebook trên Google Colab và bật GPU (`Runtime → Change runtime type`).
 2. Tải bộ dữ liệu từ Roboflow (xem mục dưới).
-3. Chạy các ô lệnh để huấn luyện mô hình phát hiện biển số và mô hình nhận diện ký tự.
-4. Tải hai file trọng số `plate.pt` và `char.pt` về, đặt cùng thư mục với `bien_so_yolo.py`.
+3. Chạy các ô lệnh để huấn luyện mô hình phát hiện biển số và mô hình ký tự.
+4. Tải `plate.pt` và `char.pt` về, đặt cùng thư mục với `bien_so_yolo.py`.
 
-| Mô hình | Nhiệm vụ | Khởi tạo từ |
-|---------|----------|-------------|
-| `plate.pt` | Phát hiện biển số | YOLOv8 pre-trained |
-| `char.pt`  | Nhận diện ký tự   | YOLOv8 pre-trained |
-
-## 📊 Dữ liệu và giấy phép
+## 📊 Dữ liệu
 
 | Bộ dữ liệu | Dùng cho | Nguồn | Giấy phép |
-|------------|----------|-------|-----------|
+| --- | --- | --- | --- |
 | Dữ liệu biển số | Huấn luyện `plate.pt` | Roboflow – tác giả QuinnNg | CC BY 4.0 |
-| Dữ liệu ký tự   | Huấn luyện `char.pt`  | Roboflow |  |
+| Dữ liệu ký tự | Huấn luyện `char.pt` | Roboflow | |
 
-Các mô hình và thư viện bên thứ ba được sử dụng:
+Thư viện và mô hình bên thứ ba:
 
-- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) (giấy phép AGPL-3.0)
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) – AGPL-3.0
 - [OpenCV](https://opencv.org/)
 - [SORT](https://github.com/abewley/sort) – Simple Online and Realtime Tracking
 - [RapidOCR](https://github.com/RapidAI/RapidOCR)
 
+## 📈 Kết quả
+
+*(Bổ sung số liệu thật của nhóm vào bảng dưới)*
+
+| Mô hình | mAP@0.5 | Precision | Recall | Số ảnh train / val |
+| --- | --- | --- | --- | --- |
+| `plate.pt` | … | … | … | … |
+| `char.pt` | … | … | … | … |
+
+Ảnh và video đầu ra nằm trong thư mục [`ket_qua/`](ket_qua/).
 
 ## ⚠️ Hạn chế và hướng phát triển
 
 **Hạn chế**
 
-- Độ chính xác giảm với biển số bị mờ, nghiêng nhiều, thiếu sáng hoặc bị che khuất.
-- Dữ liệu huấn luyện có hạn nên chưa bao quát mọi loại biển (biển 2 dòng, biển vuông, nhiều kiểu chữ).
-- Đây là bản demo phục vụ học tập, chưa tối ưu cho triển khai thời gian thực quy mô lớn.
+- Độ chính xác giảm với biển mờ, nghiêng nhiều, thiếu sáng hoặc bị che khuất.
+- Dữ liệu huấn luyện còn hạn chế, chưa bao quát biển 2 dòng, biển vuông, nhiều kiểu chữ.
+- Là bản demo học tập, chưa tối ưu cho triển khai thời gian thực quy mô lớn.
 
 **Hướng phát triển**
 
-- Mở rộng và cân bằng dữ liệu huấn luyện, thêm các điều kiện ánh sáng và thời tiết khác nhau.
-- Bổ sung bước kiểm tra định dạng biển số Việt Nam để hậu xử lý kết quả.
+- Mở rộng và cân bằng dữ liệu, thêm nhiều điều kiện ánh sáng và thời tiết.
+- Hậu xử lý bằng kiểm tra định dạng biển số Việt Nam (regex).
 - Xây dựng giao diện web/ứng dụng và lưu kết quả vào cơ sở dữ liệu.
-- Tích hợp với các bài toán giao thông thông minh như kiểm soát ra vào, thu phí tự động.
+- Tích hợp vào các bài toán như kiểm soát ra vào, thu phí tự động.
