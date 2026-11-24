@@ -136,17 +136,6 @@ Các mô hình và thư viện bên thứ ba được sử dụng:
 - [SORT](https://github.com/abewley/sort) – Simple Online and Realtime Tracking
 - [RapidOCR](https://github.com/RapidAI/RapidOCR)
 
-## 🏁 Kết quả
-
-Ảnh minh hoạ nằm trong thư mục [`ket_qua/`](ket_qua/).
-
-| Chỉ số | Mô hình phát hiện biển số | Mô hình ký tự |
-|--------|---------------------------|----------------|
-| Precision | `[ ]` | `[ ]` |
-| Recall | `[ ]` | `[ ]` |
-| mAP@0.5 | `[ ]` | `[ ]` |
-
-Kết quả thử nghiệm thực tế (chế độ `--mode yolo`): `[điền số ảnh/video đã thử, tỉ lệ đọc đúng]`.
 
 ## ⚠️ Hạn chế và hướng phát triển
 
