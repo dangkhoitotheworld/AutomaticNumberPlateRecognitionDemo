@@ -127,7 +127,7 @@ Hai mô hình được **fine-tune (huấn luyện tiếp) từ mô hình YOLOv8
 | Bộ dữ liệu | Dùng cho | Nguồn | Giấy phép |
 |------------|----------|-------|-----------|
 | Dữ liệu biển số | Huấn luyện `plate.pt` | Roboflow – tác giả QuinnNg | CC BY 4.0 |
-| Dữ liệu ký tự   | Huấn luyện `char.pt`  | Roboflow – `[điền tên/tác giả]` | `[điền giấy phép]` |
+| Dữ liệu ký tự   | Huấn luyện `char.pt`  | Roboflow |  |
 
 Các mô hình và thư viện bên thứ ba được sử dụng:
 
