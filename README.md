@@ -28,8 +28,7 @@ Khi `char.pt` không đọc được, chương trình có thể chuyển sang **
 5. [Cách sử dụng](#️-cách-sử-dụng)
 6. [Huấn luyện mô hình](#-huấn-luyện-mô-hình)
 7. [Dữ liệu](#-dữ-liệu)
-8. [Kết quả](#-kết-quả)
-9. [Hạn chế và hướng phát triển](#️-hạn-chế-và-hướng-phát-triển)
+8. [Hạn chế và hướng phát triển](#️-hạn-chế-và-hướng-phát-triển)
 
 ---
 
@@ -71,8 +70,8 @@ AutomaticNumberPlateRecognitionDemo/
 ├── plate.pt                        # Trọng số phát hiện biển số
 ├── char.pt                         # Trọng số nhận diện ký tự
 ├── huan_luyen_yolov8_colab.ipynb   # Notebook huấn luyện (Colab)
-├── anh_thu_nhieu_bien.png          # Ảnh thử nghiệm (5 biển, có biển bị xoay)
 ├── ket_qua/                        # Ảnh/video kết quả đầu ra
+│   └── anh_thu_nhieu_bien.png      # Ảnh thử nghiệm (5 biển, có biển bị xoay)
 ├── requirements.txt                # Thư viện cần cài
 ├── LICENSE
 └── README.md
@@ -95,8 +94,6 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Thư viện sử dụng: `ultralytics`, `opencv-python`, `numpy`, `rapidocr-onnxruntime`, `filterpy`, `scipy`.
-
 ## ▶️ Cách sử dụng
 
 Chương trình chính là `bien_so_yolo.py`, chọn chế độ qua tham số `--mode`:
@@ -104,21 +101,29 @@ Chương trình chính là `bien_so_yolo.py`, chọn chế độ qua tham số `
 | Chế độ | Mô tả |
 | --- | --- |
 | `yolo` | Chỉ dùng hai mô hình tự fine-tune (`plate.pt` + `char.pt`). Phù hợp để đánh giá riêng chất lượng mô hình của nhóm. |
-| `ocr` | Phát hiện biển bằng YOLO, đọc ký tự bằng RapidOCR. |
-| `auto` | Ưu tiên `char.pt`; nếu không đọc được thì chuyển sang RapidOCR. |
+| `ocr` | Chỉ dùng RapidOCR kết hợp OpenCV để tìm và đọc biển số, không cần `plate.pt` và `char.pt`. |
+| `auto` | (Mặc định) Ưu tiên `plate.pt` + `char.pt`; nếu không đọc được thì chuyển sang RapidOCR. |
+
+Ảnh được truyền trực tiếp sau tên file, video dùng tham số `--video`:
 
 ```bash
 # Ảnh mẫu, chế độ auto
-python bien_so_yolo.py --mode auto --source anh_thu_nhieu_bien.png
+python bien_so_yolo.py --mode auto ket_qua/anh_thu_nhieu_bien.png
 
 # Chỉ dùng mô hình tự fine-tune
-python bien_so_yolo.py --mode yolo --source anh_thu_nhieu_bien.png
+python bien_so_yolo.py --mode yolo ket_qua/anh_thu_nhieu_bien.png
+
+# Nhiều ảnh hoặc cả thư mục ảnh
+python bien_so_yolo.py anh1.jpg anh2.png thu_muc_anh/
 
 # Video
-python bien_so_yolo.py --mode auto --source duong_dan/video.mp4
+python bien_so_yolo.py --mode auto --video duong_dan/video.mp4
+
+# Giao diện 3 nút (ảnh, video, webcam)
+python bien_so_yolo.py --gui
 ```
 
-Xem toàn bộ tham số: `python bien_so_yolo.py --help`. Kết quả được lưu trong thư mục `ket_qua/`.
+Xem toàn bộ tham số: `python bien_so_yolo.py --help`. Kết quả được lưu trong thư mục `ket_qua/` (đổi bằng `-o ten_thu_muc`).
 
 ## 🧠 Huấn luyện mô hình
 
