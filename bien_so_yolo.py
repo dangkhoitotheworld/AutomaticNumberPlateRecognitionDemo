@@ -538,15 +538,27 @@ class YoloPipeline:
             print(f"Cảnh báo: mô hình ký tự có {len(names)} lớp (báo cáo dùng 36 lớp: 0-9 và A-Z).")
 
     # -- Mô hình 1: phát hiện vùng biển số --------------------------------- #
-    def detect_plates(self, img):
-        imgsz = 1280 if max(img.shape[:2]) > 1280 else 640
-        r = self.model_detect(img, conf=self.cp, imgsz=imgsz, verbose=False)[0]
+    def _detect(self, img, imgsz, conf, dx=0, dy=0):
+        r = self.model_detect(img, conf=conf, imgsz=imgsz, verbose=False)[0]
+        return [dict(box=(b[0] + dx, b[1] + dy, b[2] + dx, b[3] + dy), conf=float(c))
+                for b, c in zip(r.boxes.xyxy.tolist(), r.boxes.conf.tolist())]
+
+    def detect_plates(self, img, conf=None, tiles=False):
+        """tiles=True: quét thêm theo các ô chồng lấn để thấy biển nhỏ / ở xa (chậm hơn, dùng cho ảnh tĩnh)."""
+        conf = conf or self.cp
         H, W = img.shape[:2]
+        dets = self._detect(img, 1280 if max(H, W) > 1280 else 640, conf)
+        if tiles and max(H, W) > 900:
+            T, step = 480, 360
+            for y in starts(H, T, step):
+                for x in starts(W, T, step):
+                    dets += self._detect(img[y:y + T, x:x + T], 960, conf, x, y)
         out = []
-        for b, c in zip(r.boxes.xyxy.tolist(), r.boxes.conf.tolist()):
-            x1, y1, x2, y2 = int(max(0, b[0])), int(max(0, b[1])), int(min(W, b[2])), int(min(H, b[3]))
+        for d in nms_agnostic(dets, 0.4):
+            x1, y1, x2, y2 = d["box"]
+            x1, y1, x2, y2 = int(max(0, x1)), int(max(0, y1)), int(min(W, x2)), int(min(H, y2))
             if x2 - x1 > 4 and y2 - y1 > 4:
-                out.append(dict(box=(x1, y1, x2, y2), conf=float(c)))
+                out.append(dict(box=(x1, y1, x2, y2), conf=d["conf"]))
         return out
 
     @staticmethod
@@ -624,11 +636,11 @@ def ocr_crop(engine, crop):
     return max(found, key=lambda p: p["conf"]) if found else None
 
 
-def analyze_image(img, yolo=None, engine=None, mode="auto"):
+def analyze_image(img, yolo=None, engine=None, mode="auto", rescue=False):
     """Trả về list biển số: dict(quad, text, conf, kind, valid, source, crop)."""
     plates = []
     if yolo is not None and mode in ("auto", "yolo"):
-        for det in yolo.detect_plates(img):
+        for det in yolo.detect_plates(img, tiles=rescue):
             res = yolo.read_plate(img, det["box"])
             source = "yolo"
             if res is None and engine is not None and mode == "auto":  # mô hình ký tự không thấy gì -> thử OCR
@@ -646,7 +658,7 @@ def analyze_image(img, yolo=None, engine=None, mode="auto"):
                     p.update(text=alt["text"], conf=alt["conf"], kind=alt["kind"], valid=True, source="ocr")
             plates.append(p)
     if engine is not None and mode in ("auto", "ocr"):
-        if mode == "ocr" or not any(p["valid"] for p in plates):
+        if mode == "ocr" or rescue or not any(p["valid"] for p in plates):
             for p in analyze(engine, img):
                 p.update(valid=True, source="ocr")
                 plates.append(p)
@@ -783,7 +795,7 @@ def process_file(path, out_dir, yolo, engine, mode):
     img = imread(path)
     if img is None:
         return None, []
-    plates = analyze_image(img, yolo, engine, mode)
+    plates = analyze_image(img, yolo, engine, mode, rescue=True)
     vis = draw_plates(img, plates)
     os.makedirs(out_dir, exist_ok=True)
     base = os.path.splitext(os.path.basename(path))[0]
@@ -884,7 +896,7 @@ def run_gui(yolo, engine, mode, skip):
         if img is None:
             messagebox.showerror("Lỗi", "Không đọc được ảnh này.")
             return
-        plates = analyze_image(img, yolo, engine, mode)
+        plates = analyze_image(img, yolo, engine, mode, rescue=True)
         if not plates:
             messagebox.showinfo("Kết quả", "Không tìm thấy biển số trong ảnh.")
             return
